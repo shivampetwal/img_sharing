@@ -5,6 +5,5 @@
 `cd scripts ; ./start.sh`
 
 
-## This is how it should look .
-![image](https://github.com/user-attachments/assets/487a6043-c608-455d-9115-0c0ce8f44296)
-
+## figma
+  https://www.figma.com/design/hZmGo974ScVkyaj9tpmtcR/Ligma-balls?node-id=0-1&t=VK3eg1gapderzlQv-1
