@@ -14,4 +14,10 @@ docker run -d -p 6009:6009 --name go-app go
 #name of image.. go
 
 
+
+
 echo "Application started on http://localhost:6009"
+
+
+#TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO
+# []ADD DOCKER COMPOSE UP + DOWN
