@@ -1,0 +1,14 @@
+# Dockerfile.migrate
+
+FROM migrate/migrate:v4.15.2
+
+# switch into the migrations folder
+WORKDIR /migrations
+
+# copy your SQL migrations into the image
+COPY ../internal/db/migrations .
+
+# use shell‐form entrypoint so $DATABASE_URL is expanded,
+# and allow passing subcommands (up, version, force, …)
+ENTRYPOINT ["sh", "-c", "exec migrate -path /migrations -database \"$DATABASE_URL\" \"$@\"", "--"]
+CMD ["up"]
