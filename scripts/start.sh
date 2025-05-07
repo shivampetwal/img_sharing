@@ -6,12 +6,13 @@ docker rm -f go-app 2>/dev/null || true
 # Build the Docker image
 docker build -f deploy/Dockerfile -t go .
 
-# Run the container
-docker run -d -p 6009:6009 --name go-app go
-# deatached ,
-#-p portmapping
-#--name of container
-#name of image.. go
+# Bring down any existing docker-compose services to free the port
+docker compose -f ./deploy/docker-compose.yml down
 
+docker compose -f ./deploy/docker-compose.yml up -d
 
 echo "Application started on http://localhost:6009"
+
+
+#TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO
+# []ADD DOCKER COMPOSE UP + DOWN
