@@ -5,10 +5,10 @@ package handlers
 
 import (
 	"fmt"
-	"net/http"
+	//"net/http"
 	"database/sql"
 	"math/rand"
-	"time"
+	//"time"
 )
 
 // Global database connection variable; ensure it is properly initialized elsewhere.
@@ -54,17 +54,18 @@ func GenerateRandomID()(randomID int){
 func FetchRandomIDData(randomID int){
 //return type
 
-	query := fmt.Sprintf(`
-		SELECT * from images
-		where id = %s
-	`,randomID)
+	// data := fmt.Sprintf(`
+	// 	SELECT * from images
+	// 	where id = %s
+	// `,randomID)
 
 
 
-	SendRandomID(data)
+	// SendRandomID(data)
 }
 
 
-func SendRandomID(data){
+// func SendRandomID(data){
 
-}
+
+// }

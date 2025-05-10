@@ -9,7 +9,13 @@ docker build -f deploy/Dockerfile -t go .
 # Bring down any existing docker-compose services to free the port
 docker compose -f ./deploy/docker-compose.yml down
 
+
+
+echo " Running migrations…"
+./scripts/migrate.sh
+
 docker compose -f ./deploy/docker-compose.yml up -d
+
 
 echo "Application started on http://localhost:6009"
 
