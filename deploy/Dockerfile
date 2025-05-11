@@ -6,7 +6,7 @@ WORKDIR /code/idk
 RUN echo "...............LAYER 2 completed ✅..............."
 
 COPY go.mod  ./
-#add  GO.SUM later
+COPY go.sum  ./
 RUN echo "...............LAYER 3 completed ✅..............."
 
 COPY . .
