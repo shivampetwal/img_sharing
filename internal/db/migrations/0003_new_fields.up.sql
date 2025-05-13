@@ -1,0 +1,5 @@
+
+ALTER TABLE images
+ADD COLUMN title VARCHAR(255),
+ADD COLUMN size_kb INT,
+ADD COLUMN expiration INT;

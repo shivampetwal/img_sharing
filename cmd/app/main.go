@@ -1,29 +1,39 @@
 package main
 
 import (
-	"code/idk/config"
-	"code/idk/internal/db"
 	"fmt"
 	"log"
 	"net/http"
+	"os"
+
+	"code/idk/config"
+	"code/idk/internal/api" // ← import your routes package
+	"code/idk/internal/api/handlers"
+	"code/idk/internal/db"
+
+	_ "github.com/lib/pq"
 )
 
 func main() {
-	fmt.Println("Starting server on port 6009...")
-
+	// 1) load config & connect
 	cfg := config.LoadConfig()
+	conn, err := db.Connect(cfg)
+	if err != nil {
+		log.Fatal(err)
+	}
 
+	// 2) give the handlers a DB handle
+	handlers.SetDB(conn)
 
-/******** DB CONNECT + PING *********/
-_, err := db.Connect(cfg)
-if err != nil {
-	log.Fatalf("Failed to connect to database: %v", err)
-}
+	// 3) mount all routes from internal/api/routes.go
+	router := api.RegisterRoutes()
 
-
-	http.HandleFunc("/", func(w http.ResponseWriter, r *http.Request) {
-		fmt.Fprintf(w, "main.goooooooooooooooo")
-	})
-
-	log.Fatal(http.ListenAndServe(":6009", nil))
+	// 4) start the server on PORT (default 6009)
+	port := os.Getenv("PORT")
+	if port == "" {
+		port = "6009"
+	}
+	addr := fmt.Sprintf(":%s", port)
+	log.Printf("listening on %s", addr)
+	log.Fatal(http.ListenAndServe(addr, router))
 }
