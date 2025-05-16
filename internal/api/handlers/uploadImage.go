@@ -1,45 +1,43 @@
 package handlers
 
 import (
-	"bytes" // Required for new request body
+	"bytes" 
 	"encoding/json"
 	"fmt"
-	"io"             // Required for io.Copy
-	"mime/multipart" // Required for creating multipart request
+	"io"
+	"mime/multipart" //for creating multipart request
 	"net/http"
 	"os"
-	// "database/sql" // Ensure this is imported if DB operations are here
 )
 
 type UploadSuccessResp struct {
 	Data struct {
-		DisplayURL string `json:"display_url"` // Corrected based on common ImgBB response
+		DisplayURL string `json:"display_url"`
 		Title      string `json:"title"`
-		URL        string `json:"url"`        // Often same as display_url or a direct link
-		Size       int    `json:"size"`       // Size in bytes
-		Expiration int    `json:"expiration"` // Expiration in seconds (0 for no expiration)
-		// ImgBB might also return 'image', 'thumb', 'medium' URLs
+		URL        string `json:"url"`
+		Size       int    `json:"size"`
+		Expiration int    `json:"expiration"`
 	} `json:"data"`
 	Success bool `json:"success"`
-	Status  int  `json:"status"` // HTTP status code from ImgBB
+	Status  int  `json:"status"`
 }
 
-// You might also need a struct for ImgBB error responses
+//ImgBB responses
 type ImgBBErrorResp struct {
 	Error struct {
 		Message string `json:"message"`
 		Code    int    `json:"code"`
 	} `json:"error"`
 	StatusTxt string `json:"status_txt"`
-	Success   bool   `json:"success"` // Will be false
-	Status    int    `json:"status"`  // HTTP status code
+	Success   bool   `json:"success"`
+	Status    int    `json:"status"`
 }
 
 func UploadImage(w http.ResponseWriter, r *http.Request) {
-	w.Header().Set("Content-Type", "application/json") // For your API's response
+	w.Header().Set("Content-Type", "application/json")
 
 	// 1. Parse the incoming multipart form from the client
-	if err := r.ParseMultipartForm(32 << 20); err != nil { // 32MB max memory
+	if err := r.ParseMultipartForm(32 << 20); err != nil { // 32MB max
 		http.Error(w, "Failed to parse multipart form: "+err.Error(), http.StatusBadRequest)
 		return
 	}
@@ -75,9 +73,6 @@ func UploadImage(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	// Optionally add other fields like expiration
-	// Example: expire in 10 minutes (600 seconds)
-	// _ = writer.WriteField("expiration", "600")
 
 	// Close the multipart writer. This is important as it writes the trailing boundary.
 	if err = writer.Close(); err != nil {
@@ -97,7 +92,6 @@ func UploadImage(w http.ResponseWriter, r *http.Request) {
 	client := &http.Client{}
 	resp, err := client.Do(req)
 	if err != nil {
-		// This is a network error or similar before getting a response from ImgBB
 		http.Error(w, "Failed to send request to ImgBB: "+err.Error(), http.StatusInternalServerError)
 		return
 	}
@@ -110,22 +104,19 @@ func UploadImage(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	// Log the raw response for debugging
+	//raw response for debugging
 	fmt.Printf("ImgBB Raw Response (Status: %d): %s\n", resp.StatusCode, string(respBodyBytes))
 
 	// 6. Decode the ImgBB JSON response
-	// Try to decode as success first
 	var successResp UploadSuccessResp
 	if err := json.Unmarshal(respBodyBytes, &successResp); err == nil && successResp.Success {
-		// Successfully uploaded to ImgBB and parsed success response
-		fmt.Fprintf(w, "Image uploaded successfully: %s", successResp.Data.URL) // Or DisplayURL
-
+		fmt.Fprintf(w, "Image uploaded successfully: %s", successResp.Data.URL)
 		// 7. Save to database
 		if DB == nil {
 			http.Error(w, "Database connection not initialized", http.StatusInternalServerError)
 			return
 		}
-		// Use DisplayURL or URL from ImgBB response
+
 		imageURL := successResp.Data.DisplayURL
 		if imageURL == "" {
 			imageURL = successResp.Data.URL
@@ -141,20 +132,13 @@ func UploadImage(w http.ResponseWriter, r *http.Request) {
 
 		errDb := DB.QueryRow(query, successResp.Data.Title, imageURL, sizeKB, successResp.Data.Expiration).Scan(&imageID)
 		if errDb != nil {
-			fmt.Printf("DB Insert Error: %v\n", errDb) // Log DB error
-			// Don't overwrite the client's success message from ImgBB, but log the DB error
-			// Or, if DB save is critical, you might return an error to the client here.
-			// For now, we've already sent success to client based on ImgBB.
+			fmt.Printf("DB Insert Error: %v\n", errDb)
 			return
 		}
 		fmt.Printf("Image metadata saved to DB with ID: %d\n", imageID)
 		fmt.Fprintf(w, "Image metadata saved to DB with ID: %d %s", imageID, successResp.Data.URL)
-		// Optionally, you could send a more detailed success response to your client here
-		// instead of the simple fmt.Fprintf above.
-		// w.WriteHeader(http.StatusCreated)
-		// json.NewEncoder(w).Encode(map[string]interface{}{"message": "Upload successful", "id": imageID, "url": imageURL})
 
-		return // Important: exit after successful processing
+		return
 	}
 
 	// If not a success response, try to parse as an ImgBB error response
@@ -176,6 +160,5 @@ func UploadImage(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	// Fallback for unexpected scenarios
 	http.Error(w, "An unexpected error occurred after attempting to upload to ImgBB.", http.StatusInternalServerError)
 }

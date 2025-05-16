@@ -12,7 +12,7 @@ func RegisterRoutes() http.Handler {
 
 	// health‐check or home
 	mux.HandleFunc("/", func(w http.ResponseWriter, r *http.Request) {
-		w.Write([]byte("anh"))
+		w.Write([]byte("DEFAULT ENDPOINT"))
 	})
 
 	// your API endpoints
