@@ -1,7 +1,5 @@
-## clone the repo
-`git clone asalcndlcdscsjdcnsd`
 
-## Then
+## clone , Then
 `cd scripts; ./START_all_services.sh`
 
 ## figma
